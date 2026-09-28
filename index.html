@@ -16,6 +16,10 @@
 <script>(function(){try{var t=localStorage.getItem('gt-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Apps Script siempre rebota de script.google.com a googleusercontent.com.
+     Abriendo las dos conexiones desde ya, el ingreso no paga el saludo. -->
+<link rel="preconnect" href="https://script.google.com" crossorigin>
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
 <style>
 :root{
@@ -267,14 +271,6 @@ const norm=s=>String(s??'').toLowerCase().normalize('NFD').replace(/[\u0300-\u03
 const LS={get:(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}},set:(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}},del:k=>{try{localStorage.removeItem(k);}catch(e){}}};
 let toastT=null;
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600);}
-async function api(payload){
-  if(!CONFIG.API_URL)throw new Error('Falta configurar API_URL');
-  const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),25000);
-  try{
-    const res=await fetch(CONFIG.API_URL,{method:'POST',body:JSON.stringify(payload),signal:ctl.signal,redirect:'follow'});
-    return await res.json();
-  }finally{clearTimeout(to);}
-}
 
 /* =====================================================================
    TEMA
@@ -320,10 +316,29 @@ async function api(cuerpo,url){
     return await r.json();
   }finally{clearTimeout(to);}
 }
+
+/* ---------- despertador ----------
+   Google apaga el script cuando nadie lo usa, y la primera llamada paga
+   ese arranque: son los segundos que se sienten al entrar. Esto le manda
+   un golpecito mientras la persona todavia escribe, asi que para cuando
+   toca «Entrar» el servidor ya esta despierto y la hoja ya esta en cache.
+   No lleva datos, no espera respuesta y si falla no pasa nada. */
+let despiertoT=0;
+function despertar(){
+  if(!CONFIG.API_URL||!navigator.onLine)return;
+  if(Date.now()-despiertoT<90000)return;   // ya esta caliente, no insistas
+  despiertoT=Date.now();
+  try{
+    fetch(CONFIG.API_URL,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},
+      body:'{"action":"despertar"}',redirect:'follow',keepalive:true}).catch(()=>{});
+  }catch(e){}
+}
 function guardar(perfil,token){
   const foto=LS.get('gs-foto-'+perfil.cedula,'');
   S={...perfil,foto,token,exp:Date.now()+(perfil.dias||30)*864e5};
   LS.set('gs-sesion',S);
+  // para la proxima vez, este telefono ya sabe de quien es
+  LS.set('gs-ultima',{cedula:perfil.cedula,nombre:String(perfil.nombre||'').split(/\s+/)[0]||''});
 }
 function cerrarSesion(){
   LS.del('gs-sesion');S=null;
@@ -354,7 +369,16 @@ function pantallaCargando(txt){$('#lcard').innerHTML=MARCA+`<div class="cargando
 
 function pantalla(msg,tipo){
   const c=$('#lcard');
+  // cualquier pantalla de acceso que se pinte es senal de que en segundos
+  // va a haber una llamada: aprovechamos para ir despertando el servidor
+  if(A.paso==='cedula'||A.paso==='pin'||A.paso==='codigo')despertar();
   if(A.paso==='cedula'){
+    // Si esta persona ya entro antes en este telefono, vamos directo al PIN
+    const ult=LS.get('gs-ultima',null);
+    if(ult&&ult.cedula&&!A.noRecordar){
+      A.cedula=ult.cedula;A.nombre=ult.nombre||'';A.paso='pin';
+      pantalla(msg,tipo);return;
+    }
     c.innerHTML=MARCA+
       `<h1>Hola,<br><span>¿quién eres?</span></h1>
        <p class="sub">Escribe tu número de cédula para continuar.</p>
@@ -365,7 +389,7 @@ function pantalla(msg,tipo){
     enfocar('#fCedula');
     $('#bSeguir').onclick=pasoCedula;
     $('#fCedula').onkeydown=e=>{if(e.key==='Enter')pasoCedula();};
-    $('#fCedula').oninput=e=>{e.target.value=e.target.value.replace(/\D/g,'');};
+    $('#fCedula').oninput=e=>{e.target.value=e.target.value.replace(/\D/g,'');despertar();};
     return;
   }
   if(A.paso==='pin'){
@@ -375,12 +399,14 @@ function pantalla(msg,tipo){
        ${aviso(msg,tipo)}
        <input class="campo pin" id="fPin" type="password" inputmode="numeric" autocomplete="current-password" enterkeyhint="go" maxlength="6" placeholder="••••••" aria-label="PIN">
        <button class="primary" id="bEntrar">Entrar</button>
-       <button class="alterno" id="bOlvide">Olvidé mi PIN</button>`+PIE;
+       <button class="alterno" id="bOlvide">Olvidé mi PIN</button>
+       <button class="alterno" id="bOtro">No soy ${esc(A.nombre||'yo')}</button>`+PIE;
     enfocar('#fPin');
     $('#bEntrar').onclick=pasoPin;
     $('#fPin').onkeydown=e=>{if(e.key==='Enter')pasoPin();};
-    $('#fPin').oninput=e=>{e.target.value=e.target.value.replace(/\D/g,'');if(e.target.value.length===6)pasoPin();};
+    $('#fPin').oninput=e=>{e.target.value=e.target.value.replace(/\D/g,'');despertar();if(e.target.value.length===6)pasoPin();};
     $('#bOlvide').onclick=()=>{A.paso='codigo';A.reset=true;pantalla();};
+    $('#bOtro').onclick=()=>{LS.del('gs-ultima');A={paso:'cedula',cedula:'',nombre:'',pin1:'',noRecordar:true};pantalla();};
     volverA('cedula');
     return;
   }
@@ -424,7 +450,7 @@ function volverA(destino){
   const b=$('#bAtras'); if(!b)return;
   b.onclick=()=>{
     if(destino==='nuevo0'){A.pin1='';A.paso='nuevo';}
-    else if(destino==='cedula'){A={paso:'cedula',cedula:A.cedula,nombre:'',pin1:''};}
+    else if(destino==='cedula'){A={paso:'cedula',cedula:A.cedula,nombre:'',pin1:'',noRecordar:true};}
     else{A.paso=destino;A.pin1='';}
     pantalla();
   };
@@ -606,11 +632,20 @@ function avisarVersion(nuevo){
    ===================================================================== */
 addEventListener('online',()=>{$('#off').classList.remove('show');if(S)pintarServicios(false);revalidar();});
 addEventListener('offline',()=>{if(S){$('#off').classList.add('show');pintarServicios(false);}});
-document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S&&navigator.onLine)revalidar();});
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden||!navigator.onLine)return;
+  // al volver a la app (tipico: fue a WhatsApp por el codigo) el servidor
+  // ya se durmio otra vez, asi que lo despertamos antes de que escriba
+  despertar();
+  if(S)revalidar();
+});
 (function start(){
   paintTheme();
   // Mantenimiento y los demas servicios leen de aqui la direccion del servidor
   if(CONFIG.API_URL)LS.set('gs-api',CONFIG.API_URL);
+  // lo primero de todo: golpecito al servidor. Mientras se pinta la pantalla
+  // y la persona busca su cedula, Google ya esta levantando la instancia.
+  despertar();
   const token=new URLSearchParams(location.search).get('t');
   if(token){canjearEnlace(token);registrarSW();return;}
   const g=LS.get('gs-sesion',null);
