@@ -16,7 +16,7 @@
 <script>(function(){try{var t=localStorage.getItem('gt-theme');if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#071A2B;--surface:rgba(255,255,255,.06);--surface-2:rgba(255,255,255,.1);--line:rgba(255,255,255,.12);
@@ -71,6 +71,31 @@ a{color:inherit;text-decoration:none}
 .lfoot{margin-top:22px;text-align:center;font-size:12px;color:var(--muted);line-height:1.6}
 .lfoot b{background:var(--grad-text);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:gradMove 9s linear infinite}
 .tglogin{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:5}
+.campo{width:100%;font-family:'Bebas Neue',sans-serif;text-align:center;border-radius:18px;border:1.5px solid var(--line);background:var(--surface-2);outline:none;transition:border-color .2s,box-shadow .2s;color:var(--ink)}
+.campo::placeholder{color:var(--muted);opacity:.4}
+.campo:focus{border-color:var(--blue);box-shadow:0 0 0 4px rgba(55,138,221,.16)}
+.campo.cedula{font-size:36px;letter-spacing:.08em;padding:14px 16px 10px}
+.campo.pin{font-size:40px;letter-spacing:.42em;padding:14px 8px 10px;text-indent:.42em}
+.volver{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--muted);padding:6px 10px 6px 6px;border-radius:10px;margin-bottom:12px}
+.volver:hover{color:var(--ink);background:var(--surface-2)}
+.alterno{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:12px;padding:12px;border-radius:14px;font-size:13.5px;font-weight:600;color:var(--muted);text-decoration:none}
+.alterno:hover{color:var(--ink);background:var(--surface-2)}
+.wabtn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;height:54px;margin-top:4px;border-radius:18px;background:#25D366;color:#06301a;font-weight:700;font-size:15.5px;text-decoration:none;box-shadow:0 14px 30px -16px rgba(37,211,102,.8);transition:transform .15s}
+.wabtn:active{transform:scale(.97)}
+.pasos{margin:16px 0;padding:0;list-style:none;counter-reset:p}
+.pasos li{counter-increment:p;position:relative;padding:0 0 13px 36px;font-size:13.5px;color:var(--muted);line-height:1.5}
+.pasos li::before{content:counter(p);position:absolute;left:0;top:-1px;width:25px;height:25px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;font-size:11.5px;font-weight:700;color:var(--ink)}
+.pasos li b{color:var(--ink);font-weight:600}
+.aviso{display:flex;gap:10px;align-items:flex-start;margin-bottom:16px;padding:12px 13px;border-radius:14px;font-size:12.5px;line-height:1.5;color:var(--muted)}
+.aviso b{color:var(--ink)}
+.aviso.warn{background:rgba(224,168,61,.13);border:1px solid rgba(224,168,61,.4)}
+.aviso.bad{background:rgba(224,101,90,.13);border:1px solid rgba(224,101,90,.42)}
+.aviso svg{flex:0 0 auto;margin-top:1px}
+.cargando{display:flex;flex-direction:column;align-items:center;gap:16px;padding:30px 0 14px;text-align:center}
+.cargando .spin{width:34px;height:34px;border-width:3px;border-color:var(--line);border-top-color:var(--blue)}
+.cargando p{font-size:14px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.badge.id{background:rgba(55,138,221,.16);color:var(--blue);font-family:'Space Mono',monospace;letter-spacing:.04em}
 .wabtn{width:100%;height:56px;margin-top:18px;border-radius:18px;background:#25D366;color:#06301a;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;gap:10px;text-decoration:none;box-shadow:0 16px 34px -16px rgba(37,211,102,.8);transition:transform .15s}
 .wabtn:active{transform:scale(.97)}
 .pasos{margin:18px 0 0;padding:0;list-style:none;counter-reset:p}
@@ -106,7 +131,7 @@ a{color:inherit;text-decoration:none}
 .me .nm{font-size:19px;font-weight:700;line-height:1.2}
 .me .cg{font-size:13.5px;color:var(--blue);font-weight:600;margin-top:2px}
 .me .em{font-size:12.5px;color:var(--muted);margin-top:2px}
-.badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 9px;border-radius:20px;background:rgba(29,158,117,.16);color:var(--teal);margin-top:8px}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 9px;border-radius:20px;background:rgba(29,158,117,.16);color:var(--teal)}
 .badge i{width:7px;height:7px;border-radius:50%;background:currentColor;font-style:normal}
 
 .sect{display:flex;align-items:center;justify-content:space-between;margin:26px 2px 12px}
@@ -174,7 +199,7 @@ footer b{background:var(--grad-text);background-size:200% 100%;-webkit-backgroun
         <div class="nm" id="nm"></div>
         <div class="cg" id="cg"></div>
         <div class="em" id="em"></div>
-        <span class="badge"><i></i><span id="emp"></span></span>
+        <div class="chips"><span class="badge"><i></i><span id="emp"></span></span><span class="badge id" id="glid"></span></div>
       </div>
     </section>
 
@@ -195,11 +220,13 @@ footer b{background:var(--grad-text);background-size:200% 100%;-webkit-backgroun
    CONFIGURACIÓN
    ===================================================================== */
 const CONFIG={
-  // Webhooks del subflujo PORTAL en n8n
+  // Aplicacion web de Apps Script (hoja BASE DE IDENTIFICACIONES)
+  API_URL:"",
+  // Enlace directo por WhatsApp (alternativa en Android y computadora)
   CANJEAR_URL:"https://paneln8n.globecosmart.com/webhook/portal-canjear",
-  SESION_URL :"https://paneln8n.globecosmart.com/webhook/portal-sesion",
-  WHATSAPP:"593997148434",   // número del bot, sin + ni espacios
-  PALABRA:"PORTAL"           // lo que la persona escribe para recibir su enlace
+  WHATSAPP:"593978627143",   // numero del bot, sin + ni espacios
+  PALABRA_CODIGO:"CLAVE",    // para pedir el codigo de verificacion
+  PALABRA_ENLACE:"PORTAL"    // para pedir el enlace directo
 };
 
 /* Servicios del portal.
@@ -270,83 +297,231 @@ $('#themeBtn2').addEventListener('click',toggleTheme);
 mq.addEventListener&&mq.addEventListener('change',paintTheme);
 
 /* =====================================================================
-   ACCESO · el enlace llega por WhatsApp y vale una sola vez
+   ACCESO · cedula + PIN de 6 digitos
    ===================================================================== */
-let S=null;
+let S=null, A={paso:'cedula', cedula:'', nombre:'', pin1:''};
 const perfNorm=()=>new Set((S.permisos||[]).map(norm));
 function tienePerm(lista){const p=perfNorm();return (lista||[]).some(x=>p.has(norm(x)));}
 
-/* Identificador de ESTE equipo. Se crea una vez y nunca sale del teléfono:
-   es lo que impide que la sesión sirva en otro dispositivo. */
+/* Identificador de ESTE equipo. Se crea una vez y nunca sale del telefono:
+   es lo que impide que la sesion sirva en otro dispositivo. */
 function deviceId(){
   let d=LS.get('gs-device','');
   if(!d){d=(crypto.randomUUID?crypto.randomUUID():'d'+Date.now().toString(36)+Math.random().toString(36).slice(2));LS.set('gs-device',d);}
   return d;
 }
-async function pedir(url,cuerpo){
+async function api(cuerpo,url){
+  const destino=url||CONFIG.API_URL;
+  if(!destino)throw new Error('sin_api');
   const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),25000);
   try{
-    // texto plano: evita la consulta previa del navegador y n8n igual lo entiende
-    const r=await fetch(url,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify(cuerpo),signal:ctl.signal});
+    // texto plano: evita la consulta previa del navegador y el servidor igual lo entiende
+    const r=await fetch(destino,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify(cuerpo),signal:ctl.signal,redirect:'follow'});
     return await r.json();
   }finally{clearTimeout(to);}
 }
-function cerrarSesion(){LS.del('gs-sesion');S=null;$('#app').classList.remove('on');$('#login').style.display='';pantallaPedir();}
-$('#out').addEventListener('click',()=>{if(confirm('¿Cerrar sesión en este dispositivo?'))cerrarSesion();});
-
-/* ---------- pantallas ---------- */
-const MARCA='<div class="lbrand"><span class="mark"><img src="mark-white.png" alt="GLOBECO" width="30" height="30"></span><div><b>GLOBECO SMART</b><small>Portal de servicios</small></div></div>';
-const PIE='<div class="lfoot">GLOBECO SMART · Designed by <b>W.I.G.</b> — CTO &amp; DoA</div>';
-const ICO_WA='<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.4A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.9.8.8-2.8-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.1-.2 0-.4.1-.5l.4-.5.2-.4c0-.1 0-.3-.1-.4l-.7-1.7c-.2-.5-.4-.4-.5-.4h-.5c-.2 0-.4.1-.6.3a3 3 0 0 0-1 2.3 5.3 5.3 0 0 0 1.1 2.8 12 12 0 0 0 4.6 4c2.1.8 2.1.6 2.5.5a2.7 2.7 0 0 0 1.8-1.3c.2-.4.2-.7.1-.8z"/></svg>';
-const ICO_INFO='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.1"/></svg>';
-const enlaceWA=()=>`https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent(CONFIG.PALABRA)}`;
-
-function pantallaCargando(txt){
-  $('#lcard').innerHTML=MARCA+`<div class="cargando"><span class="spin"></span><p>${esc(txt)}</p></div>`;
-}
-function pantallaPedir(msg,tipo){
-  $('#lcard').innerHTML=MARCA+
-    `<h1>Tu acceso<br><span>llega por WhatsApp</span></h1>
-     <p class="sub">Escríbenos y te enviamos un enlace personal. Así confirmamos que eres tú, sin contraseñas que recordar.</p>
-     ${msg?`<div class="aviso ${tipo||'warn'}">${ICO_INFO}<span>${msg}</span></div>`:''}
-     <a class="wabtn" href="${enlaceWA()}" target="_blank" rel="noopener">${ICO_WA} Pedir acceso por WhatsApp</a>
-     <ol class="pasos">
-       <li>Envía la palabra <b>${esc(CONFIG.PALABRA)}</b> por WhatsApp.</li>
-       <li>Recibes un enlace que dura <b>10 minutos</b>.</li>
-       <li>Ábrelo <b>en este mismo teléfono</b> y listo.</li>
-     </ol>
-     <div class="aviso warn">${ICO_INFO}<span>El enlace sirve <b>una sola vez</b>. Si lo reenvías, quien lo abra primero entrará con tu usuario.</span></div>`+PIE;
-}
-
-/* ---------- canje del enlace y revalidación ---------- */
-function guardar(sid,perfil,dias){
-  S={...perfil,session:sid,exp:Date.now()+(dias||30)*864e5};
+function guardar(perfil,token){
+  const foto=LS.get('gs-foto-'+perfil.cedula,'');
+  S={...perfil,foto,token,exp:Date.now()+(perfil.dias||30)*864e5};
   LS.set('gs-sesion',S);
 }
+function cerrarSesion(){
+  LS.del('gs-sesion');S=null;
+  $('#app').classList.remove('on');$('#login').style.display='';
+  A={paso:'cedula',cedula:'',nombre:'',pin1:''};pantalla();
+}
+$('#out').addEventListener('click',()=>{if(confirm('¿Cerrar sesión en este dispositivo?'))cerrarSesion();});
+
+/* La foto de la credencial se guarda una vez para que se vea sin señal */
+async function traerFoto(){
+  if(!S||!S.tiene_foto||S.foto)return;
+  try{
+    const r=await api({action:'foto',token:S.token});
+    if(r&&r.ok&&r.foto){LS.set('gs-foto-'+S.cedula,r.foto);S.foto=r.foto;LS.set('gs-sesion',S);pintarPerfil();}
+  }catch(e){}
+}
+
+/* ---------- piezas de la pantalla ---------- */
+const MARCA='<div class="lbrand"><span class="mark"><img src="mark-white.png" alt="GLOBECO" width="30" height="30"></span><div><b>GLOBECO SMART</b><small>Portal de servicios</small></div></div>';
+const PIE='<div class="lfoot">GLOBECO SMART · Designed by <b>W.I.G.</b> — CTO &amp; DoA</div>';
+const ICO_WA='<svg width="19" height="19" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.5 15.2L2 22l4.9-1.4A10 10 0 1 0 12 2zm0 18a8 8 0 0 1-4.1-1.1l-.3-.2-2.9.8.8-2.8-.2-.3A8 8 0 1 1 12 20zm4.4-6c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1l-.7.9c-.1.2-.3.2-.5.1a6.5 6.5 0 0 1-3.2-2.8c-.1-.2 0-.4.1-.5l.4-.5.2-.4c0-.1 0-.3-.1-.4l-.7-1.7c-.2-.5-.4-.4-.5-.4h-.5c-.2 0-.4.1-.6.3a3 3 0 0 0-1 2.3 5.3 5.3 0 0 0 1.1 2.8 12 12 0 0 0 4.6 4c2.1.8 2.1.6 2.5.5a2.7 2.7 0 0 0 1.8-1.3c.2-.4.2-.7.1-.8z"/></svg>';
+const ICO_INFO='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.1"/></svg>';
+const waLink=txt=>`https://wa.me/${CONFIG.WHATSAPP}?text=${encodeURIComponent(txt)}`;
+const aviso=(m,t)=>m?`<div class="aviso ${t||'warn'}">${ICO_INFO}<span>${m}</span></div>`:'';
+const atras='<button class="volver" id="bAtras"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>Atrás</button>';
+
+function pantallaCargando(txt){$('#lcard').innerHTML=MARCA+`<div class="cargando"><span class="spin"></span><p>${esc(txt)}</p></div>`;}
+
+function pantalla(msg,tipo){
+  const c=$('#lcard');
+  if(A.paso==='cedula'){
+    c.innerHTML=MARCA+
+      `<h1>Hola,<br><span>¿quién eres?</span></h1>
+       <p class="sub">Escribe tu número de cédula para continuar.</p>
+       ${aviso(msg,tipo)}
+       <input class="campo cedula" id="fCedula" inputmode="numeric" autocomplete="username" enterkeyhint="go" maxlength="13" placeholder="0000000000" value="${esc(A.cedula)}" aria-label="Cédula">
+       <button class="primary" id="bSeguir">Continuar</button>
+       <a class="alterno" href="${waLink(CONFIG.PALABRA_ENLACE)}" target="_blank" rel="noopener">${ICO_WA} Entrar con un enlace por WhatsApp</a>`+PIE;
+    enfocar('#fCedula');
+    $('#bSeguir').onclick=pasoCedula;
+    $('#fCedula').onkeydown=e=>{if(e.key==='Enter')pasoCedula();};
+    $('#fCedula').oninput=e=>{e.target.value=e.target.value.replace(/\D/g,'');};
+    return;
+  }
+  if(A.paso==='pin'){
+    c.innerHTML=MARCA+atras+
+      `<h1>Hola,<br><span>${esc(A.nombre)}</span></h1>
+       <p class="sub">Escribe tu PIN de 6 dígitos para entrar.</p>
+       ${aviso(msg,tipo)}
+       <input class="campo pin" id="fPin" type="password" inputmode="numeric" autocomplete="current-password" enterkeyhint="go" maxlength="6" placeholder="••••••" aria-label="PIN">
+       <button class="primary" id="bEntrar">Entrar</button>
+       <button class="alterno" id="bOlvide">Olvidé mi PIN</button>`+PIE;
+    enfocar('#fPin');
+    $('#bEntrar').onclick=pasoPin;
+    $('#fPin').onkeydown=e=>{if(e.key==='Enter')pasoPin();};
+    $('#fPin').oninput=e=>{e.target.value=e.target.value.replace(/\D/g,'');if(e.target.value.length===6)pasoPin();};
+    $('#bOlvide').onclick=()=>{A.paso='codigo';A.reset=true;pantalla();};
+    volverA('cedula');
+    return;
+  }
+  if(A.paso==='codigo'){
+    c.innerHTML=MARCA+atras+
+      `<h1>${A.reset?'Recupera':'Crea'}<br><span>tu PIN</span></h1>
+       <p class="sub">Te enviamos un código de 6 dígitos por WhatsApp para confirmar que eres tú.</p>
+       ${aviso(msg,tipo)}
+       <a class="wabtn" href="${waLink(CONFIG.PALABRA_CODIGO)}" target="_blank" rel="noopener">${ICO_WA} Pedir código por WhatsApp</a>
+       <ol class="pasos">
+         <li>Envía la palabra <b>${esc(CONFIG.PALABRA_CODIGO)}</b>.</li>
+         <li>Recibes un código de 6 dígitos.</li>
+         <li><b>Vuelve a esta app</b> y escríbelo aquí abajo.</li>
+       </ol>
+       <input class="campo pin" id="fCod" inputmode="numeric" autocomplete="one-time-code" enterkeyhint="go" maxlength="6" placeholder="000000" aria-label="Código">
+       <button class="primary" id="bCod">Verificar código</button>`+PIE;
+    $('#bCod').onclick=pasoCodigo;
+    $('#fCod').onkeydown=e=>{if(e.key==='Enter')pasoCodigo();};
+    $('#fCod').oninput=e=>{e.target.value=e.target.value.replace(/\D/g,'');if(e.target.value.length===6)pasoCodigo();};
+    volverA(A.reset?'pin':'cedula');
+    return;
+  }
+  if(A.paso==='nuevo'){
+    const seg=!!A.pin1;
+    c.innerHTML=MARCA+atras+
+      `<h1>${seg?'Repite':'Elige'}<br><span>tu PIN</span></h1>
+       <p class="sub">${seg?'Escríbelo otra vez para confirmar.':'Seis dígitos que solo tú conozcas. Lo usarás cada vez que entres.'}</p>
+       ${aviso(msg,tipo)}
+       <input class="campo pin" id="fNuevo" type="password" inputmode="numeric" autocomplete="new-password" enterkeyhint="go" maxlength="6" placeholder="••••••" aria-label="Nuevo PIN">
+       <button class="primary" id="bNuevo">${seg?'Guardar PIN':'Continuar'}</button>
+       ${seg?'':aviso('No uses tu fecha de nacimiento ni 123456.','warn')}`+PIE;
+    enfocar('#fNuevo');
+    $('#bNuevo').onclick=pasoNuevo;
+    $('#fNuevo').onkeydown=e=>{if(e.key==='Enter')pasoNuevo();};
+    $('#fNuevo').oninput=e=>{e.target.value=e.target.value.replace(/\D/g,'');if(e.target.value.length===6)pasoNuevo();};
+    volverA(seg?'nuevo0':'codigo');
+  }
+}
+function enfocar(sel){setTimeout(()=>{const el=$(sel);if(el&&innerWidth>820)el.focus();},250);}
+function volverA(destino){
+  const b=$('#bAtras'); if(!b)return;
+  b.onclick=()=>{
+    if(destino==='nuevo0'){A.pin1='';A.paso='nuevo';}
+    else if(destino==='cedula'){A={paso:'cedula',cedula:A.cedula,nombre:'',pin1:''};}
+    else{A.paso=destino;A.pin1='';}
+    pantalla();
+  };
+}
+function cargando(id,txt){const b=$(id);if(b){b.disabled=true;b.innerHTML='<span class="spin"></span>'+(txt||'');}}
+
+/* ---------- pasos ---------- */
+async function pasoCedula(){
+  const ci=($('#fCedula').value||'').trim();
+  if(ci.length<6){pantalla('Escribe tu número de cédula completo.','bad');return;}
+  A.cedula=ci; cargando('#bSeguir','Verificando…');
+  try{
+    const r=await api({action:'estado',cedula:ci});
+    if(!r.ok){
+      const m={no_encontrado:'No encontramos esa cédula. Revisa el número o escribe a soporte.',inactivo:'Tu usuario está inactivo. Contacta a tu supervisor.'};
+      pantalla(m[r.error]||'No pudimos validar la cédula.','bad');return;
+    }
+    A.nombre=r.nombre||'';
+    if(r.bloqueado){A.paso='pin';pantalla(`Demasiados intentos. Espera ${r.minutos} minuto${r.minutos===1?'':'s'} o recupera tu PIN.`,'bad');return;}
+    if(!r.tiene_whatsapp&&!r.tiene_pin){pantalla('No tienes un WhatsApp registrado, así que no podemos enviarte el código. Pide a tu supervisor que lo agregue.','bad');return;}
+    A.paso=r.tiene_pin?'pin':'codigo'; A.reset=false; pantalla();
+  }catch(e){pantalla(mensajeRed(e),'bad');}
+}
+async function pasoPin(){
+  const pin=($('#fPin').value||'').trim();
+  if(pin.length!==6){pantalla('El PIN tiene 6 dígitos.','bad');return;}
+  cargando('#bEntrar','Entrando…');
+  try{
+    const r=await api({action:'login',cedula:A.cedula,pin,device:deviceId()});
+    if(r.ok){guardar(r.perfil,r.token);abrirPortal();traerFoto();return;}
+    const m={pin_incorrecto:`PIN incorrecto. Te quedan ${r.intentos} intento${r.intentos===1?'':'s'}.`,
+             bloqueado:`Demasiados intentos. Espera ${r.minutos} minutos o recupera tu PIN.`,
+             sin_pin:'Aún no has creado tu PIN.',
+             inactivo:'Tu usuario está inactivo.'};
+    if(r.error==='sin_pin'){A.paso='codigo';A.reset=false;pantalla(m.sin_pin,'warn');return;}
+    pantalla(m[r.error]||'No pudimos verificar tu PIN.','bad');
+  }catch(e){pantalla(mensajeRed(e),'bad');}
+}
+function pasoCodigo(){
+  const cod=($('#fCod').value||'').trim();
+  if(cod.length!==6){pantalla('El código tiene 6 dígitos.','bad');return;}
+  A.codigo=cod; A.pin1=''; A.paso='nuevo'; pantalla();
+}
+async function pasoNuevo(){
+  const pin=($('#fNuevo').value||'').trim();
+  if(pin.length!==6){pantalla('El PIN tiene 6 dígitos.','bad');return;}
+  if(!A.pin1){
+    if(/^(\d)\1{5}$/.test(pin)||'012345678901234'.includes(pin)||'098765432109876'.includes(pin)){
+      pantalla('Ese PIN es muy fácil de adivinar. Elige otro.','bad');return;
+    }
+    A.pin1=pin; pantalla(); return;
+  }
+  if(pin!==A.pin1){A.pin1='';pantalla('Los dos PIN no coinciden. Empecemos de nuevo.','bad');return;}
+  cargando('#bNuevo','Guardando…');
+  try{
+    const r=await api({action:'clave',cedula:A.cedula,codigo:A.codigo,pin,device:deviceId()});
+    if(r.ok){guardar(r.perfil,r.token);abrirPortal();traerFoto();toast('PIN guardado');return;}
+    const m={codigo_expirado:'El código caducó. Pide uno nuevo por WhatsApp.',
+             codigo_incorrecto:'El código no es correcto. Revísalo o pide uno nuevo.',
+             pin_invalido:'El PIN debe tener 6 dígitos.'};
+    A.pin1='';
+    if(r.error==='codigo_expirado'||r.error==='codigo_incorrecto'){A.paso='codigo';pantalla(m[r.error],'bad');return;}
+    pantalla(m[r.error]||'No pudimos guardar tu PIN.','bad');
+  }catch(e){A.pin1='';pantalla(mensajeRed(e),'bad');}
+}
+const mensajeRed=e=>String(e&&e.message)==='sin_api'
+  ? 'Falta conectar el servidor. Avisa a soporte.'
+  : (navigator.onLine?'No pudimos conectar. Intenta otra vez.':'Sin conexión. Necesitas internet para entrar la primera vez.');
+
+/* ---------- enlace directo por WhatsApp (alternativa) ---------- */
 async function canjearEnlace(token){
   pantallaCargando('Verificando tu enlace…');
   try{
-    const r=await pedir(CONFIG.CANJEAR_URL,{token,device:deviceId()});
+    const r=await api({token,device:deviceId()},CONFIG.CANJEAR_URL);
     if(r&&r.ok){
-      guardar(r.session,r.perfil,r.perfil.dias);
-      history.replaceState(null,'',location.pathname);   // el enlace sale de la barra de direcciones
-      abrirPortal(true);
-      return;
+      guardar({...r.perfil,tiene_foto:true},r.session);
+      history.replaceState(null,'',location.pathname);
+      abrirPortal();traerFoto();return;
     }
-    const motivos={enlace_usado:'Ese enlace ya se usó o caducó. Pide uno nuevo por WhatsApp.',peticion_invalida:'El enlace no es válido. Pide uno nuevo.'};
-    pantallaPedir(motivos[r&&r.error]||'No pudimos validar el enlace. Pide uno nuevo.','bad');
-  }catch(e){
-    pantallaPedir(navigator.onLine?'No pudimos conectar con el servidor. Intenta otra vez.':'Sin conexión. Conéctate a internet para activar tu acceso.','bad');
-  }
+    A.paso='cedula';pantalla('Ese enlace ya se usó o caducó. Entra con tu cédula y PIN.','bad');
+  }catch(e){A.paso='cedula';pantalla('No pudimos validar el enlace. Entra con tu cédula y PIN.','bad');}
 }
+
+/* ---------- revalidar la sesion guardada ---------- */
 async function revalidar(){
   if(!S)return;
   try{
-    const r=await pedir(CONFIG.SESION_URL,{session:S.session,device:deviceId()});
-    if(r&&r.ok){S={...S,...r.perfil};LS.set('gs-sesion',S);pintarServicios(false);}
-    else if(r&&(r.error==='sesion_expirada'||r.error==='otro_dispositivo')){
-      LS.del('gs-sesion');S=null;$('#app').classList.remove('on');$('#login').style.display='';
-      pantallaPedir(r.error==='otro_dispositivo'?'Tu acceso se abrió en otro dispositivo. Por seguridad, pide un enlace nuevo.':'Tu acceso caducó. Pide un enlace nuevo por WhatsApp.','bad');
+    const r=await api({action:'sesion',token:S.token,device:deviceId()});
+    if(r&&r.ok){S={...S,...r.perfil};LS.set('gs-sesion',S);pintarPerfil();pintarServicios(false);traerFoto();}
+    else if(r&&r.error){
+      const m={sesion_expirada:'Tu sesión caducó. Entra otra vez con tu PIN.',
+               otro_dispositivo:'Tu sesión se abrió en otro dispositivo. Entra otra vez con tu PIN.',
+               inactivo:'Tu usuario fue desactivado.'};
+      LS.del('gs-sesion');S=null;
+      $('#app').classList.remove('on');$('#login').style.display='';
+      A={paso:'cedula',cedula:'',nombre:'',pin1:''};
+      pantalla(m[r.error]||'Entra otra vez con tu PIN.','bad');
     }
   }catch(e){/* sin señal: continúa con la sesión guardada */}
 }
@@ -355,15 +530,21 @@ async function revalidar(){
    PORTAL
    ===================================================================== */
 function iniciales(n){return String(n||'').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();}
-function abrirPortal(anim){
-  $('#login').style.display='none';$('#app').classList.add('on');
-  $('#av').innerHTML=S.foto?`<img src="${esc(S.foto)}" alt="" referrerpolicy="no-referrer" onerror="this.parentNode.textContent='${esc(iniciales(S.nombre))}'">`:esc(iniciales(S.nombre));
+function pintarPerfil(){
+  if(!S)return;
+  $('#av').innerHTML=S.foto?`<img src="${esc(S.foto)}" alt="">`:esc(iniciales(S.nombre));
   $('#nm').textContent=S.nombre||'—';
   $('#cg').textContent=S.cargo||'';
   $('#em').textContent=S.email||S.cedula||'';
   $('#emp').textContent=[S.empresa,S.ciudad].filter(Boolean).join(' · ')||'GLOBECO';
+  const gl=$('#glid');
+  if(S.id_gl){gl.textContent=S.id_gl;gl.style.display='';}else gl.style.display='none';
   $('#ses').textContent=`Acceso válido solo en este dispositivo, hasta el ${new Date(S.exp).toLocaleDateString('es-EC',{day:'numeric',month:'long'})}`;
-  pintarServicios(anim);
+}
+function abrirPortal(){
+  $('#login').style.display='none';$('#app').classList.add('on');
+  pintarPerfil();
+  pintarServicios(true);
   $('#off').classList.toggle('show',!navigator.onLine);
 }
 function pintarServicios(anim){
@@ -431,8 +612,8 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S&&naviga
   const token=new URLSearchParams(location.search).get('t');
   if(token){canjearEnlace(token);registrarSW();return;}
   const g=LS.get('gs-sesion',null);
-  if(g&&g.exp>Date.now()){S=g;abrirPortal(true);revalidar();}
-  else{LS.del('gs-sesion');pantallaPedir();}
+  if(g&&g.exp>Date.now()){S=g;abrirPortal();revalidar();}
+  else{LS.del('gs-sesion');pantalla();}
   registrarSW();
 })();
 </script>
