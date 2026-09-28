@@ -1,5 +1,5 @@
 /* GLOBECO SMART · Portal — guarda la app para abrir sin internet */
-const CACHE = 'gs-portal-v3';
+const CACHE = 'gs-portal-v4';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './mark-white.png'];
 
 self.addEventListener('install', e => {
