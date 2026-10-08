@@ -247,12 +247,16 @@ const IC={
   taxi:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16.5V12l2-4.5h12L20 12v4.5"/><path d="M9.5 4h5v3.5h-5z"/><path d="M4 16.5h16"/><circle cx="7.5" cy="16.5" r="1.6"/><circle cx="16.5" cy="16.5" r="1.6"/></svg>',
   alert:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 21 19H3z"/><path d="M12 9.5v4M12 16.4v.1"/></svg>',
   doc:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg>',
-  chat:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5.1A8 8 0 1 1 21 12z"/></svg>'
+  chat:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-5.1A8 8 0 1 1 21 12z"/></svg>',
+  prev:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/><path d="m9 15 2 2 4-4"/></svg>',
+  corr:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>'
 };
 const SERVICIOS=[
   {id:'credencial', t:'Credencial digital', d:'Tu carnet, tu foto y tu QR', url:'/equipo/', c:'#378ADD', ic:IC.cred, perms:['credencial_digital','credencial_foto']},
   {id:'contenedores',t:'Mapa de contenedores', d:'Ubicación por número y ruta', url:'/contenedores/', c:'#1D9E75', ic:IC.map, perms:['ubicacion_contenedor']},
   {id:'mantenimiento',t:'Mantenimiento', d:'Hoja de revisión de contenedores', url:'/mantenimiento/', c:'#2A93A8', ic:IC.check, perms:['mantenimiento_contenedor','MNT_MANYCHAT']},
+  {id:'preventivo',t:'Mantenimiento preventivo', d:'OK, ajuste o cambio por punto', url:'/mantenimiento/?modo=preventivo', c:'#1D9E75', ic:IC.prev, perms:['mantenimiento_preventivo'], cache:'mantenimiento'},
+  {id:'correctivo',t:'Mantenimiento correctivo', d:'Lo que dejó el preventivo', url:'/mantenimiento/?modo=correctivo', c:'#E0655A', ic:IC.corr, perms:['mantenimiento_correctivo'], cache:'mantenimiento'},
   {id:'asistencia', t:'Asistencia', d:'Entrada y salida con foto', url:'https://globecolatam.github.io/asistencia/', c:'#1D9E75', ic:'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>', perms:['asistencia']},         
   {id:'supervision', t:'Supervisión', d:'Mantenimiento en tiempo real', url:'/supervision/', c:'#1D9E75', ic:'<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>', perms:['supervision_mantenimiento','supervision']},   
   {id:'repuestos', t:'Repuestos', d:'Salidas, retornos y bodega', url:'/repuestos/', c:'#E0A83D', ic:IC.box, perms:['salida_repuesto','retorno_repuesto','intercambio_bodega'], alta:['intercambio_bodega']},
@@ -582,7 +586,7 @@ function pintarServicios(anim){
   if(!vis.length){g.innerHTML='<div class="none"><b>Sin servicios asignados</b>Pide a tu supervisor que te habilite los permisos en la Base de identificaciones.</div>';return;}
   g.innerHTML=vis.map((s,i)=>{
     const soon=!s.url;
-    const listo=!!LS.get('gs-visto-'+s.id,false);
+    const listo=!!LS.get('gs-visto-'+(s.cache||s.id),false);
     return `<a class="tile${soon?' soon':''}" data-id="${s.id}" href="${soon?'#':esc(s.url)}" style="--_c:${s.c};animation-delay:${Math.min(i*55,400)}ms">
       <span class="ic">${s.ic}</span>
       <b>${esc(s.t)}</b><small>${esc(s.d)}</small>
@@ -595,12 +599,12 @@ $('#grid').addEventListener('click',async e=>{
   const s=SERVICIOS.find(x=>x.id===a.dataset.id);
   if(!s.url){e.preventDefault();toast('Este servicio estará disponible pronto');return;}
   // sin señal, un servicio que nunca se abrió no está guardado en el teléfono
-  if(!navigator.onLine&&!LS.get('gs-visto-'+s.id,false)){
+  if(!navigator.onLine&&!LS.get('gs-visto-'+(s.cache||s.id),false)){
     e.preventDefault();
     toast('Necesitas conexión la primera vez que abres '+s.t);
     return;
   }
-  LS.set('gs-visto-'+s.id,true);
+  LS.set('gs-visto-'+(s.cache||s.id),true);
 });
 
 /* =====================================================================
