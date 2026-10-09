@@ -1,5 +1,5 @@
 /* GLOBECO SMART · Portal — guarda la app para abrir sin internet */
-const CACHE = 'gs-portal-v11';
+const CACHE = 'gs-portal-v12';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './apple-touch-icon.png', './mark-white.png'];
 
 self.addEventListener('install', e => {
@@ -42,7 +42,12 @@ self.addEventListener('fetch', e => {
   if (url.hostname.endsWith('google.com') || url.hostname.endsWith('googleusercontent.com')) return;
 
   // Páginas: red primero con respaldo local
-  if (req.mode === 'navigate') { e.respondWith(netFirst(req, './index.html')); return; }
+  // (solo el portal se guarda como index; otras páginas, como nomina.html, con su propio nombre)
+  if (req.mode === 'navigate') {
+    const esPortal = /\/(index\.html)?$/.test(url.pathname);
+    e.respondWith(netFirst(req, esPortal ? './index.html' : url.pathname));
+    return;
+  }
 
   // Archivos de la app y tipografías: copia local primero
   if (url.origin === location.origin || url.hostname.startsWith('fonts.g')) {

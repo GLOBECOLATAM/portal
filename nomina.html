@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#071A2B">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>Reporte de nómina · GLOBECO SMART</title>
+<script>(function(){try{var t=localStorage.getItem('gt-theme');if(t&&t.charAt(0)==='"')t=JSON.parse(t);if(t==='light'||t==='dark')document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://script.google.com" crossorigin>
+<link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#071A2B;--surface:rgba(255,255,255,.055);--surface-2:rgba(255,255,255,.09);--line:rgba(255,255,255,.11);
+  --ink:#EAF2F8;--muted:#8FA6B8;--blue:#378ADD;--teal:#1D9E75;--amber:#E0A83D;--red:#E0655A;--violet:#9B72CF;
+  --grad:linear-gradient(135deg,#1D9E75 0%,#2A93A8 50%,#378ADD 100%);
+  --grad-text:linear-gradient(90deg,#34C38F,#378ADD,#7CC0FF,#34C38F);
+  --panel:rgba(9,30,48,.88);--shadow:0 20px 50px -24px rgba(0,0,0,.8);--aurora-o:.45;
+}
+:root[data-theme="light"]{--bg:#EEF4F8;--surface:rgba(255,255,255,.78);--surface-2:rgba(11,30,46,.05);--line:rgba(11,30,46,.1);--ink:#0B1E2E;--muted:#587084;--panel:rgba(255,255,255,.92);--shadow:0 20px 50px -30px rgba(11,30,46,.4);--aurora-o:.3}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--bg:#EEF4F8;--surface:rgba(255,255,255,.78);--surface-2:rgba(11,30,46,.05);--line:rgba(11,30,46,.1);--ink:#0B1E2E;--muted:#587084;--panel:rgba(255,255,255,.92);--shadow:0 20px 50px -30px rgba(11,30,46,.4);--aurora-o:.3}}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
+button,input{font:inherit;color:inherit}
+button{background:none;border:none;cursor:pointer}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+@keyframes gradMove{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes lat{50%{opacity:.35}}
+.aurora{position:fixed;inset:0;z-index:0;pointer-events:none;opacity:var(--aurora-o);overflow:hidden}
+.aurora i{position:absolute;width:90vmax;height:90vmax;border-radius:50%}
+.aurora i:nth-child(1){background:radial-gradient(circle,rgba(29,158,117,.5),transparent 60%);left:-40vmax;top:-45vmax}
+.aurora i:nth-child(2){background:radial-gradient(circle,rgba(155,114,207,.45),transparent 60%);right:-45vmax;bottom:-40vmax}
+.wrap{position:relative;z-index:1;max-width:640px;margin:0 auto;padding:0 16px 60px}
+.hdr{position:sticky;top:0;z-index:30;padding:calc(10px + env(safe-area-inset-top,0px)) 0 10px;background:linear-gradient(var(--bg) 70%,transparent);display:flex;align-items:center;gap:10px}
+.ibtn{width:42px;height:42px;border-radius:13px;border:1px solid var(--line);background:var(--surface);display:grid;place-items:center;flex:0 0 auto;text-decoration:none;color:inherit}
+.mark{width:40px;height:40px;border-radius:12px;background:var(--grad);background-size:200% 200%;animation:gradMove 10s linear infinite;display:grid;place-items:center;flex:0 0 auto}
+.ttl{flex:1;min-width:0}.ttl b{display:block;font-size:16px;font-weight:700}.ttl small{display:block;font-size:12px;color:var(--muted);letter-spacing:.14em}
+.card{position:relative;margin-top:14px;padding:18px;border-radius:22px;background:var(--surface);border:1px solid var(--line);overflow:hidden;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.card.top::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:var(--grad);background-size:200% 100%;animation:gradMove 8s linear infinite}
+h1{font-family:'Bebas Neue',sans-serif;font-weight:400;font-size:38px;line-height:.95;background:var(--grad-text);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:gradMove 9s linear infinite}
+.sub{font-size:13.5px;color:var(--muted);margin:6px 0 16px;line-height:1.45}
+.presets{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.presets button{font-size:13px;font-weight:600;padding:8px 13px;border-radius:11px;border:1px solid var(--line);background:var(--surface-2);color:var(--muted)}
+.presets button.on{background:rgba(55,138,221,.15);border-color:rgba(55,138,221,.45);color:var(--blue)}
+.fechas{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}.fechas label{display:block;min-width:0}
+.lbl{font-size:12.5px;font-weight:600;color:var(--muted);margin:0 2px 6px;display:block}
+.inp{width:100%;min-width:0;max-width:100%;-webkit-appearance:none;appearance:none;min-height:50px;padding:13px 14px;border-radius:15px;border:1px solid var(--line);background:var(--surface-2);font-size:16px;outline:none;color-scheme:dark}
+:root[data-theme="light"] .inp{color-scheme:light}
+.inp:focus{border-color:var(--blue)}
+.resumen{font-size:13px;color:var(--muted);margin:12px 2px 0;min-height:18px}
+.resumen b{color:var(--ink)}
+.primary{width:100%;height:54px;margin-top:14px;border-radius:17px;background:var(--grad);background-size:200% 100%;animation:gradMove 8s linear infinite;color:#fff;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;gap:10px;box-shadow:0 16px 34px -14px rgba(55,138,221,.7)}
+.primary:disabled{opacity:.6}
+.spin{width:18px;height:18px;border-radius:50%;border:2.4px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .8s linear infinite;display:inline-block}
+.aviso{margin-top:12px;padding:11px 13px;border-radius:14px;font-size:13px;line-height:1.45}
+.aviso.bad{background:rgba(224,101,90,.13);color:var(--red)}
+.aviso.ok{background:rgba(29,158,117,.13);color:var(--teal)}
+.linkrow{display:flex;justify-content:space-between;align-items:center;margin:22px 2px 10px}
+.linkrow h3{font-size:15px;font-weight:700}
+.linkrow button{font-size:13px;font-weight:600;color:var(--blue)}
+.list{display:flex;flex-direction:column;gap:10px}
+.rep{position:relative;padding:14px 14px 14px 18px;border-radius:18px;background:var(--surface);border:1px solid var(--line);overflow:hidden;animation:pop .35s}
+.rep::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--_c,var(--muted))}
+.rep-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.rep-f{font-family:'Bebas Neue',sans-serif;font-size:25px;line-height:1}
+.rep-p{font-size:12px;color:var(--muted);margin-top:3px}
+.est{font-size:11.5px;font-weight:700;padding:5px 9px;border-radius:9px;white-space:nowrap}
+.est.g{background:rgba(29,158,117,.15);color:var(--teal)}
+.est.w{background:rgba(55,138,221,.15);color:var(--blue);animation:lat 1.4s infinite}
+.est.a{background:var(--surface-2);color:var(--muted)}
+.est.x{background:rgba(224,101,90,.14);color:var(--red)}
+.rep-o{font-size:12.5px;color:var(--muted);margin-top:8px;line-height:1.4}
+.bar{height:4px;border-radius:99px;background:var(--surface-2);overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;background:var(--grad);transition:width .4s}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.acts button,.acts a{font-size:13px;font-weight:600;padding:8px 12px;border-radius:11px;background:var(--surface-2);border:1px solid var(--line);text-decoration:none;color:var(--ink);display:inline-flex;align-items:center;gap:6px}
+.acts .xl{color:var(--teal)}.acts .pdf{color:var(--red)}.acts .gen{color:var(--blue)}
+.empty{text-align:center;padding:32px 20px;color:var(--muted);border:1px dashed var(--line);border-radius:20px;font-size:13.5px;line-height:1.5}
+.empty b{display:block;font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--ink);font-weight:400;margin-bottom:4px}
+.toast{position:fixed;left:0;right:0;margin:0 auto;width:max-content;max-width:calc(100% - 32px);bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:90;transform:translateY(20px);opacity:0;padding:12px 18px;border-radius:14px;background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);font-size:14px;font-weight:500;pointer-events:none;transition:opacity .25s,transform .35s}
+.toast.show{opacity:1;transform:none}
+footer{text-align:center;font-size:12px;color:var(--muted);padding:26px 0 10px}
+footer b{background:var(--grad-text);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="aurora" aria-hidden="true"><i></i><i></i></div>
+<div class="wrap">
+  <header class="hdr">
+    <a class="ibtn" href="./" aria-label="Volver al portal"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></a>
+    <span class="mark"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span>
+    <div class="ttl"><b>Reporte de nómina</b><small>ASISTENCIA</small></div>
+  </header>
+
+  <section class="card top" id="form">
+    <h1>Sacar reporte</h1>
+    <p class="sub">Elige las fechas. Se arma en Drive con el consolidado (Excel y PDF) y el PDF de marcaciones de cada colaborador. Puedes cerrar esta pantalla: queda en la lista de abajo.</p>
+    <div class="presets" id="pre">
+      <button data-p="mes">Este mes</button>
+      <button data-p="ant">Mes anterior</button>
+      <button data-p="q1">1 al 15</button>
+      <button data-p="q2">16 a fin de mes</button>
+      <button data-p="7">Últimos 7 días</button>
+    </div>
+    <div class="fechas">
+      <label><span class="lbl">Desde</span><input class="inp" type="date" id="desde"></label>
+      <label><span class="lbl">Hasta</span><input class="inp" type="date" id="hasta"></label>
+    </div>
+    <div class="resumen" id="res"></div>
+    <button class="primary" id="gen">Generar reporte</button>
+    <div id="msg"></div>
+  </section>
+
+  <div class="linkrow"><h3>Reportes</h3><button id="act">Actualizar</button></div>
+  <div class="list" id="list"><div class="empty"><b>Cargando…</b>Trayendo los reportes.</div></div>
+  <footer>GLOBECO SMART · Designed by <b>W.I.G.</b> — CTO &amp; DoA</footer>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const PERMISOS=['reporte_nomina'];
+const DIAS_MAX=93;
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const LS={get:(k,d)=>{try{const v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}};
+const pad=n=>String(n).padStart(2,'0');
+const iso=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const dmy=s=>s?`${s.slice(8,10)}/${s.slice(5,7)}/${s.slice(0,4)}`:'';
+const dias=(a,b)=>Math.round((new Date(b+'T12:00')-new Date(a+'T12:00'))/864e5)+1;
+const norm=t=>String(t??'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'_').replace(/^_|_$/g,'');
+let toastT;function toast(m){const t=$('#toast');t.innerHTML=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),3200);}
+
+const S=(()=>{const s=LS.get('gs-sesion',null);return s&&s.exp>Date.now()?s:null;})();
+const API=LS.get('gs-api','');
+const DEVICE=LS.get('gs-device','');
+
+async function api(cuerpo){
+  if(!API)throw new Error('sin_api');
+  let ultimo;
+  for(let i=0;i<2;i++){
+    const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),i?45000:30000);
+    try{
+      const r=await fetch(API,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},
+        body:JSON.stringify({...cuerpo,token:S.token,device:DEVICE}),signal:ctl.signal,redirect:'follow'});
+      const t=await r.text();
+      try{return JSON.parse(t);}catch(e){ultimo=new Error('respuesta_rara');}
+    }catch(e){ultimo=e;if(!navigator.onLine)break;}
+    finally{clearTimeout(to);}
+    if(!i)await new Promise(ok=>setTimeout(ok,800));
+  }
+  throw ultimo;
+}
+const ERR={sesion_expirada:'Tu sesión caducó. Entra otra vez al portal.',otro_dispositivo:'Tu sesión se abrió en otro dispositivo. Entra otra vez al portal.',
+  sin_permiso:'No tienes el permiso «reporte_nomina». Pídeselo a tu supervisor.',inactivo:'Tu usuario está inactivo.',
+  fechas:'Revisa las fechas: «Desde» tiene que ser antes que «Hasta».',rango_largo:`El rango no puede pasar de ${DIAS_MAX} días.`,
+  futuro:'Esas fechas todavía no llegan.',anulado:'Ese período está ANULADO en la hoja.',sin_archivo:'Ese archivo todavía no está en la carpeta.',
+  muy_grande:'El archivo es muy grande para bajarlo desde aquí. Ábrelo en la carpeta.',accion_desconocida:'Falta publicar la versión nueva del servidor.'};
+const msgDe=e=>ERR[e]||(navigator.onLine?'No pudimos conectar. Intenta otra vez.':'Sin conexión.');
+
+/* ---------- fechas ---------- */
+function rango(p){
+  const h=new Date(),y=h.getFullYear(),m=h.getMonth();
+  if(p==='mes')return [iso(new Date(y,m,1)),iso(h)];
+  if(p==='ant')return [iso(new Date(y,m-1,1)),iso(new Date(y,m,0))];
+  if(p==='q1')return [iso(new Date(y,m,1)),iso(new Date(y,m,Math.min(15,h.getDate())))];
+  if(p==='q2'){const ini=h.getDate()>=16?new Date(y,m,16):new Date(y,m-1,16),fin=h.getDate()>=16?h:new Date(y,m,0);return [iso(ini),iso(fin)];}
+  if(p==='7'){const a=new Date(h);a.setDate(a.getDate()-6);return [iso(a),iso(h)];}
+}
+function pintarResumen(){
+  const d=$('#desde').value,h=$('#hasta').value,el=$('#res');
+  if(!d||!h){el.textContent='';return;}
+  if(d>h){el.innerHTML='<b style="color:var(--red)">«Desde» va después de «Hasta».</b>';return;}
+  const n=dias(d,h),hoy=iso(new Date());
+  el.innerHTML=`<b>${n} día${n===1?'':'s'}</b> · del ${dmy(d)} al ${dmy(h)}${h>=hoy?' · <b>parcial</b>, hasta hoy':''}${n>DIAS_MAX?` · <b style="color:var(--red)">máximo ${DIAS_MAX} días</b>`:''}`;
+}
+$('#pre').addEventListener('click',e=>{const b=e.target.closest('[data-p]');if(!b)return;
+  const [d,h]=rango(b.dataset.p);$('#desde').value=d;$('#hasta').value=h;
+  document.querySelectorAll('#pre button').forEach(x=>x.classList.toggle('on',x===b));pintarResumen();});
+['desde','hasta'].forEach(id=>$('#'+id).addEventListener('input',()=>{document.querySelectorAll('#pre button').forEach(x=>x.classList.remove('on'));pintarResumen();}));
+$('#hasta').max=iso(new Date());$('#desde').max=iso(new Date());
+{const [d,h]=rango('ant');$('#desde').value=d;$('#hasta').value=h;document.querySelector('[data-p="ant"]').classList.add('on');pintarResumen();}
+
+/* ---------- generar ---------- */
+async function generar(desde,hasta,boton){
+  const msg=$('#msg');msg.innerHTML='';
+  if(!desde||!hasta||desde>hasta){msg.innerHTML=`<div class="aviso bad">${ERR.fechas}</div>`;return;}
+  if(dias(desde,hasta)>DIAS_MAX){msg.innerHTML=`<div class="aviso bad">${ERR.rango_largo}</div>`;return;}
+  const txt=boton.innerHTML;boton.disabled=true;boton.innerHTML='<span class="spin"></span>Pidiendo…';
+  try{
+    const r=await api({action:'rp_generar',desde,hasta});
+    if(!r.ok){msg.innerHTML=`<div class="aviso bad">${esc(msgDe(r.error))}</div>`;return;}
+    msg.innerHTML=`<div class="aviso ok">${r.ya?'Ese reporte ya se está armando.':'Listo, el reporte entró a la cola.'} Arranca en un minuto; abajo ves el avance.</div>`;
+    await cargar();
+  }catch(e){msg.innerHTML=`<div class="aviso bad">${esc(msgDe(e.message))}</div>`;}
+  finally{boton.disabled=false;boton.innerHTML=txt;}
+}
+$('#gen').addEventListener('click',e=>generar($('#desde').value,$('#hasta').value,e.currentTarget));
+
+/* ---------- lista ---------- */
+let LISTA=[],POLL=null;
+function estadoDe(p){
+  const e=p.est,obs=p.obs||'';
+  if(e==='GENERADO')return ['g','Listo','#1D9E75'];
+  if(e.indexOf('GENERANDO')===0)return ['w',e.replace('GENERANDO','Armando'),'#378ADD'];
+  if(e==='GENERAR')return ['w','En cola','#378ADD'];
+  if(e==='ANULADO')return ['a','Anulado','#587084'];
+  if(/^Error/i.test(obs))return ['x','Con error','#E0655A'];
+  if(p.carpeta)return ['g','Parcial listo','#1D9E75'];
+  return ['a','Abierto','#587084'];
+}
+function pintar(){
+  const L=$('#list');
+  if(!LISTA.length){L.innerHTML='<div class="empty"><b>Aún no hay reportes</b>Elige las fechas arriba y toca «Generar reporte».</div>';return;}
+  L.innerHTML=LISTA.map(p=>{
+    const [c,t,col]=estadoDe(p);
+    const m=p.est.match(/(\d+)\/(\d+)/),pct=m?Math.round(m[1]/Math.max(1,m[2])*100):0;
+    const hecho=!!p.carpeta;
+    const trabajando=c==='w';
+    return `<div class="rep" style="--_c:${col}">
+      <div class="rep-top"><div><div class="rep-f">${dmy(p.desde)} — ${dmy(p.hasta)}</div>
+        <div class="rep-p">${esc(p.per==='PEDIDO'?'Pedido desde el portal':'Período '+p.per)}${p.gen?' · generado '+esc(p.gen):''}</div></div>
+        <span class="est ${c}">${esc(t)}</span></div>
+      ${m?`<div class="bar"><i style="width:${pct}%"></i></div>`:''}
+      ${p.obs?`<div class="rep-o">${esc(p.obs)}</div>`:''}
+      <div class="acts">
+        ${hecho&&!trabajando?`<button class="xl" data-f="${p.fila}" data-t="xlsx">⬇ Excel</button><button class="pdf" data-f="${p.fila}" data-t="pdf">⬇ PDF</button><a href="${esc(p.carpeta)}" target="_blank" rel="noopener">Carpeta</a>`:''}
+        ${!trabajando&&p.est!=='ANULADO'?`<button class="gen" data-g="${p.desde}|${p.hasta}">${hecho?'Volver a generar':'Generar ahora'}</button>`:''}
+      </div></div>`;
+  }).join('');
+}
+async function cargar(silencio){
+  try{
+    const r=await api({action:'rp_lista'});
+    if(!r.ok){if(!silencio)$('#list').innerHTML=`<div class="empty"><b>No se pudo</b>${esc(msgDe(r.error))}</div>`;return;}
+    LISTA=r.periodos||[];pintar();
+    clearTimeout(POLL);
+    if(LISTA.some(p=>p.est==='GENERAR'||p.est.indexOf('GENERANDO')===0))POLL=setTimeout(()=>cargar(true),15000);
+  }catch(e){if(!silencio)$('#list').innerHTML=`<div class="empty"><b>Sin conexión</b>${esc(msgDe(e.message))}</div>`;}
+}
+$('#act').addEventListener('click',()=>cargar());
+$('#list').addEventListener('click',async e=>{
+  const g=e.target.closest('[data-g]');
+  if(g){const [d,h]=g.dataset.g.split('|');
+    if(!confirm(`¿Generar el reporte del ${dmy(d)} al ${dmy(h)}?`))return;
+    generar(d,h,g);return;}
+  const b=e.target.closest('[data-f]');if(!b)return;
+  const txt=b.innerHTML;b.disabled=true;b.innerHTML='<span class="spin" style="border-color:rgba(127,127,127,.35);border-top-color:currentColor;width:14px;height:14px"></span>Bajando…';
+  try{
+    const r=await api({action:'rp_archivo',fila:+b.dataset.f,tipo:b.dataset.t});
+    if(!r.ok){toast(esc(msgDe(r.error)));return;}
+    const bin=atob(r.b64),u8=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u8[i]=bin.charCodeAt(i);
+    const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([u8],{type:r.mime}));a.download=r.nombre;
+    document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1500);
+  }catch(err){toast(esc(msgDe(err.message)));}
+  finally{b.disabled=false;b.innerHTML=txt;}
+});
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&S)cargar(true);});
+
+/* ---------- arranque ---------- */
+(function(){
+  if(!S){document.querySelector('.wrap').innerHTML+='';$('#form').innerHTML='<h1>Entra desde el portal</h1><p class="sub">Para sacar reportes necesitas haber ingresado con tu cédula y PIN.</p><a class="primary" href="./" style="text-decoration:none">Ir al portal</a>';$('#list').innerHTML='';return;}
+  const mios=new Set((S.permisos||[]).map(norm));
+  if(!PERMISOS.some(p=>mios.has(norm(p)))){$('#form').innerHTML=`<h1>Sin permiso</h1><p class="sub">${ERR.sin_permiso}</p><a class="primary" href="./" style="text-decoration:none">Volver al portal</a>`;$('#list').innerHTML='';return;}
+  cargar();
+})();
+</script>
+</body>
+</html>
