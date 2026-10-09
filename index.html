@@ -315,13 +315,63 @@ function deviceId(){
 async function api(cuerpo,url){
   const destino=url||CONFIG.API_URL;
   if(!destino)throw new Error('sin_api');
-  const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),25000);
-  try{
-    // texto plano: evita la consulta previa del navegador y el servidor igual lo entiende
-    const r=await fetch(destino,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify(cuerpo),signal:ctl.signal,redirect:'follow'});
-    return await r.json();
-  }finally{clearTimeout(to);}
+  // Google a veces tarda o devuelve una pagina de error en vez de JSON
+  // (cuando esta ocupado). Un segundo intento casi siempre entra, asi que
+  // se hace solo, sin mostrarle a la persona «intenta otra vez».
+  let ultimo;
+  for(let intento=0;intento<2;intento++){
+    const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),intento?30000:20000);
+    try{
+      // texto plano: evita la consulta previa del navegador y el servidor igual lo entiende
+      const r=await fetch(destino,{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify(cuerpo),signal:ctl.signal,redirect:'follow'});
+      const txt=await r.text();
+      try{return JSON.parse(txt);}catch(e){ultimo=new Error('respuesta_rara');}
+    }catch(e){ultimo=e;if(!navigator.onLine)break;}
+    finally{clearTimeout(to);}
+    if(intento===0)await new Promise(ok=>setTimeout(ok,700));
+  }
+  throw ultimo;
 }
+
+/* ---------- entrada al instante en el mismo telefono ----------
+   Cuando alguien entra con su PIN, su sesion se guarda en el telefono
+   CIFRADA con una llave que sale de ese PIN. La proxima vez que escriba el
+   PIN aqui, se descifra en el propio telefono (menos de medio segundo) y
+   entra de una; el servidor confirma por detras que siga activo. Sin el PIN
+   correcto la copia no se puede abrir. Si no hay copia, o el PIN no la
+   abre, se pregunta al servidor como siempre (y ahi cuentan los intentos). */
+const LLAVE='gs-llave', VUELTAS_LLAVE=210000;
+const b64=u=>btoa(String.fromCharCode(...new Uint8Array(u)));
+const deb64=t=>Uint8Array.from(atob(t),c=>c.charCodeAt(0));
+async function llaveDe(pin,sal){
+  const base=await crypto.subtle.importKey('raw',new TextEncoder().encode(pin+'|'+deviceId()),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt:sal,iterations:VUELTAS_LLAVE,hash:'SHA-256'},base,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function guardarLlave(pin){
+  try{
+    if(!crypto.subtle||!S||!S.token)return;
+    const sal=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
+    const {foto,...perfilSinFoto}=S;
+    const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},await llaveDe(pin,sal),new TextEncoder().encode(JSON.stringify(perfilSinFoto)));
+    // una por persona: en un telefono compartido cada quien entra con lo suyo
+    const todas=llaves();todas[String(S.cedula)]={sal:b64(sal),iv:b64(iv),ct:b64(ct),t:Date.now()};
+    const orden=Object.entries(todas).sort((a,b)=>b[1].t-a[1].t).slice(0,8);
+    LS.set(LLAVE,Object.fromEntries(orden));
+  }catch(e){}
+}
+async function abrirConLlave(ci,pin){
+  try{
+    const L=llaves()[String(ci)];
+    if(!L||!crypto.subtle)return null;
+    const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:deb64(L.iv)},await llaveDe(pin,deb64(L.sal)),deb64(L.ct));
+    const g=JSON.parse(new TextDecoder().decode(pt));
+    // a la sesion le tiene que quedar al menos un dia; si no, se renueva en el servidor
+    if(!g||!g.token||!(g.exp>Date.now()+864e5))return null;
+    return g;
+  }catch(e){return null;}   // PIN distinto o copia de otro PIN: va al servidor
+}
+function llaves(){const v=LS.get(LLAVE,{});return (v&&typeof v==='object'&&!v.ci)?v:{};}
+function borrarLlave(ci){const t=llaves();delete t[String(ci)];LS.set(LLAVE,t);}
 
 /* ---------- despertador ----------
    Google apaga el script cuando nadie lo usa, y la primera llamada paga
@@ -484,16 +534,26 @@ async function pasoPin(){
   const pin=($('#fPin').value||'').trim();
   if(pin.length!==6){pantalla('El PIN tiene 6 dígitos.','bad');return;}
   cargando('#bEntrar','Entrando…');
+  const local=await abrirConLlave(A.cedula,pin);
+  if(local){
+    S={...local,foto:LS.get('gs-foto-'+local.cedula,'')};
+    LS.set('gs-sesion',S);
+    abrirPortal();traerFoto();
+    revalidar();            // el servidor confirma por detras
+    return;
+  }
+  const lento=setTimeout(()=>cargando('#bEntrar','El servidor está lento, sigue entrando…'),5000);
   try{
     const r=await api({action:'login',cedula:A.cedula,pin,device:deviceId()});
-    if(r.ok){guardar(r.perfil,r.token);abrirPortal();traerFoto();return;}
+    clearTimeout(lento);
+    if(r.ok){guardar(r.perfil,r.token);abrirPortal();traerFoto();guardarLlave(pin);return;}
     const m={pin_incorrecto:`PIN incorrecto. Te quedan ${r.intentos} intento${r.intentos===1?'':'s'}.`,
              bloqueado:`Demasiados intentos. Espera ${r.minutos} minutos o recupera tu PIN.`,
              sin_pin:'Aún no has creado tu PIN.',
              inactivo:'Tu usuario está inactivo.'};
     if(r.error==='sin_pin'){A.paso='codigo';A.reset=false;pantalla(m.sin_pin,'warn');return;}
     pantalla(m[r.error]||'No pudimos verificar tu PIN.','bad');
-  }catch(e){pantalla(mensajeRed(e),'bad');}
+  }catch(e){clearTimeout(lento);pantalla(mensajeRed(e),'bad');}
 }
 function pasoCodigo(){
   const cod=($('#fCod').value||'').trim();
@@ -513,7 +573,7 @@ async function pasoNuevo(){
   cargando('#bNuevo','Guardando…');
   try{
     const r=await api({action:'clave',cedula:A.cedula,codigo:A.codigo,pin,device:deviceId()});
-    if(r.ok){guardar(r.perfil,r.token);abrirPortal();traerFoto();toast('PIN guardado');return;}
+    if(r.ok){guardar(r.perfil,r.token);abrirPortal();traerFoto();toast('PIN guardado');guardarLlave(pin);return;}
     const m={codigo_expirado:'El código caducó. Pide uno nuevo por WhatsApp.',
              codigo_incorrecto:'El código no es correcto. Revísalo o pide uno nuevo.',
              pin_invalido:'El PIN debe tener 6 dígitos.'};
@@ -550,7 +610,7 @@ async function revalidar(){
       const m={sesion_expirada:'Tu sesión caducó. Entra otra vez con tu PIN.',
                otro_dispositivo:'Tu sesión se abrió en otro dispositivo. Entra otra vez con tu PIN.',
                inactivo:'Tu usuario fue desactivado.'};
-      LS.del('gs-sesion');S=null;
+      borrarLlave(S.cedula);LS.del('gs-sesion');S=null;
       $('#app').classList.remove('on');$('#login').style.display='';
       A={paso:'cedula',cedula:'',nombre:'',pin1:''};
       pantalla(m[r.error]||'Entra otra vez con tu PIN.','bad');
