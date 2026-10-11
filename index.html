@@ -405,11 +405,21 @@ function cerrarSesion(){
 $('#out').addEventListener('click',()=>{if(confirm('¿Cerrar sesión en este dispositivo?'))cerrarSesion();});
 
 /* La foto de la credencial se guarda una vez para que se vea sin señal */
+/* Si la foto cambia (desde la credencial o por WhatsApp), se vuelve a bajar */
 async function traerFoto(){
-  if(!S||!S.tiene_foto||S.foto)return;
+  if(!S)return;
+  const kv='gs-foto-v-'+S.cedula,v=S.foto_v,cur=String(LS.get(kv,'')||'');
+  // recién cambiada en este teléfono: la base tarda unos minutos, no la pises con la anterior
+  if(cur.indexOf('local:')===0&&Date.now()-Number(cur.slice(6))<15*60000)return;
+  if(v===undefined){if(!S.tiene_foto||S.foto)return;}           // servidor anterior
+  else if(!v){
+    if(S.foto){S.foto='';LS.del('gs-foto-'+S.cedula);LS.del(kv);LS.set('gs-sesion',S);pintarPerfil();}
+    return;
+  }
+  else if(S.foto&&cur===v)return;                       // ya es la misma
   try{
     const r=await api({action:'foto',token:S.token});
-    if(r&&r.ok&&r.foto){LS.set('gs-foto-'+S.cedula,r.foto);S.foto=r.foto;LS.set('gs-sesion',S);pintarPerfil();}
+    if(r&&r.ok&&r.foto){LS.set('gs-foto-'+S.cedula,r.foto);if(v)LS.set(kv,v);S.foto=r.foto;LS.set('gs-sesion',S);pintarPerfil();}
   }catch(e){}
 }
 
