@@ -969,7 +969,7 @@ const dupHTML=d=>`<div class="gar" style="--_g:rgba(224,101,90,.12);--_b:rgba(22
 if(!S){$('#noSes').hidden=false;}
 else if(MODO==='sup'){
   if(!ES_SUP){$('#noPerm').hidden=false;$('#noPermTx').innerHTML='Este panel necesita el permiso <b>control_uso_supervision</b> en la Base de identificaciones.';}
-  else{$('#supView').hidden=false;$('#savebar').hidden=true;cargarPanel();setInterval(()=>{if(document.visibilityState==='visible'&&!$('#modal').classList.contains('open'))cargarPanel();},120000);}
+  else{$('#supView').hidden=false;$('#savebar').hidden=true;if(!perms.has(PERM_ADMIN))$('#addEq').hidden=true;cargarPanel();setInterval(()=>{if(document.visibilityState==='visible'&&!$('#modal').classList.contains('open'))cargarPanel();},120000);}
 }
 else{
   if(!ES_OP){$('#noPerm').hidden=false;$('#noPermTx').innerHTML='Este servicio necesita el permiso <b>control_uso</b> en la Base de identificaciones.';}
