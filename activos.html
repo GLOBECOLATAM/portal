@@ -212,6 +212,14 @@ textarea.inp{min-height:80px;resize:vertical}
 .pad-w .base{position:absolute;left:24px;right:24px;bottom:46px;border-top:1.5px dashed #9AB0C0;pointer-events:none}
 .pad-w .hint{position:absolute;left:0;right:0;bottom:16px;text-align:center;font-size:12px;color:#587084;pointer-events:none}
 .pad-w .x{position:absolute;left:26px;bottom:50px;font-size:20px;color:#9AB0C0;pointer-events:none}
+.visor{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;flex-direction:column}
+.visor-h{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:calc(10px + env(safe-area-inset-top,0px)) max(14px,env(safe-area-inset-right,0px)) 10px max(14px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--line)}
+.visor-h b{font-size:15px}.visor-h .muted{flex:1;font-size:12.5px}
+.visor iframe{flex:1;width:100%;border:0;background:#fff}
+.gar-b{margin-top:12px;padding:12px;border-radius:14px;border:1px solid var(--line);background:var(--surface-2,rgba(255,255,255,.04))}
+.gar-q{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}.gar-q button{height:28px;padding:0 9px;border-radius:8px;border:1px solid var(--line);background:none;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer}
+.gar-q button:hover{color:var(--ink);border-color:var(--blue)}
+.chk input:disabled+span{opacity:.55}
 .chk{display:flex;gap:10px;align-items:flex-start;margin-top:12px;font-size:13.5px;line-height:1.4;cursor:pointer}
 .chk input{width:20px;height:20px;margin-top:1px;accent-color:var(--blue);flex:0 0 auto}
 .items-m{display:flex;flex-direction:column;gap:6px;margin-top:10px;max-height:300px;overflow:auto}
@@ -526,6 +534,16 @@ function padFirma(canvas){
   };
 }
 
+/* El acta tal como queda impresa: se puede leer antes de firmar */
+const VISTAS=new Set();
+async function verActa(numero,btn){
+  const r=await llamar({action:'ac_acta_vista',numero},btn,'Abriendo…');if(!r.ok)return false;
+  VISTAS.add(numero);
+  const v=document.createElement('div');v.className='visor';
+  v.innerHTML=`<div class="visor-h"><b>Acta ${esc(numero)}</b><span class="muted">Documento completo que se firma</span><button class="btn sm bl" id="vCerrar">Listo, la leí</button></div><iframe title="Acta ${esc(numero)}"></iframe>`;
+  document.body.appendChild(v);v.querySelector('iframe').srcdoc=r.html;
+  return new Promise(ok=>{v.querySelector('#vCerrar').onclick=()=>{v.remove();ok(true);};});
+}
 /* Abre un acta: detalle, firmas que faltan, firmar (propia o presencial), rechazar/anular, PDF */
 async function abrirActa(numero,alCerrar){
   const c=abrir(`<div style="padding:30px 0;text-align:center"><span class="spin dk"></span></div>`,false,alCerrar);
@@ -549,6 +567,7 @@ function pintarActa(a,alCerrar){
     <h2 style="margin-top:6px">${esc({ASIGNACION:'Asignación de activos',TRASPASO:'Traspaso de custodia',DEVOLUCION:'Devolución a bodega',SIN_CUSTODIO:'Sin custodio designado',BAJA:'Baja de activos'}[a.tipo]||a.tipo)}</h2>
     <p class="sub">${esc(a.n_items)} activo${a.n_items==1?'':'s'}${a.motivo?' · '+esc(a.motivo):''} · ${esc(a.empresa)} · ${esc(a.ciudad)}</p>
     <div class="parts">${parte('ENTREGA')}${parte('RECIBE')}${parte('TESTIGO')}</div>
+    <button class="btn" id="aVer" style="width:100%;margin-top:12px;justify-content:center">📄 Ver el acta completa${pend?' (lo que se firma)':''}</button>
     <div class="items-m">${(a.items||[]).map(it=>`<div class="im"><span class="th">${it.foto?`<img src="${thumb(it.foto,120)}" alt="" loading="lazy">`:ICO.box}</span><span style="min-width:0"><span class="cod">${esc(it.codigo)}</span><b>${esc(it.descripcion)}</b><small class="muted">${esc([it.marca,it.modelo,it.serie&&('Serie '+it.serie),it.estado_fisico].filter(Boolean).join(' · '))}</small></span></div>`).join('')}</div>
     ${a.estado==='ANULADA'?`<div class="aviso bad">Acta anulada. ${esc(a.rechazo||'')}</div>`:''}
     ${a.estado==='FIRMADA'?`<div class="aviso ok">Firmada por todas las partes el ${esc(dmy(a.cerrado_el))}.</div><div class="row" style="margin-top:12px"><button class="btn tl" id="aPdf">⬇ Descargar PDF</button></div>`:''}
@@ -556,6 +575,7 @@ function pintarActa(a,alCerrar){
     ${pend?`<div class="row end" style="margin-top:16px">${(ADMIN||mio.length)?`<button class="btn sm rd" id="aRech">${ADMIN?'Anular acta':'Rechazar'}</button>`:''}</div>`:''}
   `,false,alCerrar);
   if($('#aPdf'))$('#aPdf').onclick=e=>bajarPdf(a.numero,e.currentTarget);
+  $('#aVer').onclick=e=>verActa(a.numero,e.currentTarget);
   if($('#aRech'))$('#aRech').onclick=async e=>{
     const m=prompt(ADMIN?'Motivo para anular el acta:':'¿Por qué rechazas el acta? (por ejemplo: falta un activo, está dañado)');
     if(!m||!m.trim())return;
@@ -582,17 +602,20 @@ function hojaFirma(a,b,decl,alCerrar){
     <h2 style="margin-top:6px">Firma</h2>
     <p class="sub"><b style="color:var(--ink)">${esc(b.nombre)}</b> · ${esc(b.presencial?ROL_TXT[b.rol]+' · firma en este dispositivo':b.txt.replace('Tu firma','').replace(/^ ?[·(] ?/,'').replace(/\)$/,''))}</p>
     <div class="aviso inf" style="margin-top:8px">${esc(d)}</div>
+    <button class="btn ${VISTAS.has(a.numero)?'':'bl'}" id="pVer" style="width:100%;margin-top:10px;justify-content:center">${VISTAS.has(a.numero)?'✓ Acta leída · volver a verla':'📄 Leer el acta completa antes de firmar'}</button>
     <div class="pad-w"><canvas id="pad"></canvas><span class="x">✕</span><span class="base"></span><span class="hint">Firma aquí con el dedo o el mouse</span></div>
-    <label class="chk"><input type="checkbox" id="pAcepto"><span>Revisé ${esc(a.n_items)} activo${a.n_items==1?'':'s'} del acta ${esc(a.numero)} y acepto su contenido.</span></label>
+    <label class="chk"><input type="checkbox" id="pAcepto" ${VISTAS.has(a.numero)?'':'disabled'}><span>Leí el acta ${esc(a.numero)} completa (${esc(a.n_items)} activo${a.n_items==1?'':'s'}) y acepto su contenido.</span></label>
     <div class="row" style="margin-top:14px"><button class="btn" id="pBorrar">Borrar</button><button class="primary" id="pFirmar" style="flex:1;width:auto">Firmar</button></div>
   `,false,alCerrar);
   const pad=padFirma($('#pad'));
   addEventListener('resize',pad.ajustar,{once:true});
   $('#pBorrar').onclick=()=>pad.limpiar();
+  $('#pVer').onclick=async e=>{const ok=await verActa(a.numero,e.currentTarget);if(ok){$('#pAcepto').disabled=false;const b=$('#pVer');b.classList.remove('bl');b.textContent='✓ Acta leída · volver a verla';}};
   $('#pFirmar').onclick=async e=>{
     if(pad.vacio()){toast('Dibuja la firma primero.');return;}
+    if(!VISTAS.has(a.numero)){toast('Primero lee el acta completa.');return;}
     if(!$('#pAcepto').checked){toast('Marca la casilla de aceptación.');return;}
-    const r=await llamar({action:'ac_firmar',numero:a.numero,rol:b.rol,firma:pad.png(),presencial:b.presencial},e.currentTarget,'Guardando firma…');
+    const r=await llamar({action:'ac_firmar',numero:a.numero,rol:b.rol,firma:pad.png(),presencial:b.presencial,visto:VISTAS.has(a.numero)},e.currentTarget,'Guardando firma…');
     if(!r.ok)return;
     if(r.cerrada){toast('Acta firmada por todos. Custodia actualizada ✓',4200);if(INV)await cargarInv(true);}
     else toast('Firma guardada.');
@@ -766,22 +789,42 @@ const CAMPOS=[
   ['DESCRIPCION','Descripción','text',1],['MARCA','Marca','text'],['MODELO','Modelo','text'],['SERIE','Serie','text'],
   ['COLOR','Color','text'],['MATERIAL','Material','text']];
 const CAMPOS_COMPRA=[['VALOR_COMPRA','Valor de compra (USD)','number'],['FECHA_COMPRA','Fecha de compra','date'],['PROVEEDOR','Proveedor','text'],
-  ['FACTURA','N.º de factura','text'],['GARANTIA_HASTA','Garantía hasta','date'],['POLIZA','Póliza de seguro','text']];
+  ['FACTURA','N.º de factura','text'],['POLIZA','Póliza de seguro','text']];
+/* Garantía: desde cuándo corre + cuántos meses (y km si es vehículo). La fecha final se calcula sola y se puede corregir. */
+function garFin(desde,meses){if(!/^\d{4}-\d{2}-\d{2}$/.test(desde||'')||!(+meses>0))return '';const [y,m,d]=desde.split('-').map(Number);const f=new Date(y,m-1+(+meses),d);f.setDate(f.getDate()-1);return `${f.getFullYear()}-${String(f.getMonth()+1).padStart(2,'0')}-${String(f.getDate()).padStart(2,'0')}`;}
+function garTexto(a){if(!a.garantia_hasta&&!a.garantia_meses)return '';const m=+a.garantia_meses;const dur=m?(m%12===0?`${m/12} año${m===12?'':'s'}`:`${m} meses`):'';
+  return [a.garantia_desde?'Desde '+dmy(a.garantia_desde):'',dur,a.garantia_hasta?'hasta '+dmy(a.garantia_hasta):'',a.garantia_km?`o ${Number(a.garantia_km).toLocaleString('es-EC')} km (lo que ocurra primero)`:''].filter(Boolean).join(' · ');}
+function garBloque(datos,req){const cat=datos.CATEGORIA;
+  return `<div class="gar-b"><div class="lbl" style="margin-bottom:6px">Garantía${req?' <span class="req">*</span>':''}</div>
+    <div class="grid2">
+      <label class="fld"><span class="lbl">Corre desde</span><input class="inp" type="date" data-k="GARANTIA_DESDE" value="${esc(datos.GARANTIA_DESDE||'')}"><small class="muted" style="font-size:11.5px;margin-top:3px">Normalmente la fecha de compra o de entrega</small></label>
+      <label class="fld"><span class="lbl">Duración (meses)</span><input class="inp" type="number" min="1" step="1" inputmode="numeric" data-k="GARANTIA_MESES" value="${esc(datos.GARANTIA_MESES||'')}" placeholder="Ej. 12">
+        <span class="gar-q">${[6,12,24,36,60].map(m=>`<button type="button" data-gm="${m}">${m%12===0?m/12+' año'+(m===12?'':'s'):m+' m'}</button>`).join('')}</span></label>
+      ${cat==='VEH'||datos.GARANTIA_KM?`<label class="fld"><span class="lbl">O hasta (km)</span><input class="inp" type="number" min="0" step="1000" inputmode="numeric" data-k="GARANTIA_KM" value="${esc(datos.GARANTIA_KM||'')}" placeholder="Ej. 100000"><small class="muted" style="font-size:11.5px;margin-top:3px">Lo que ocurra primero</small></label>`:''}
+      <label class="fld"><span class="lbl">Vence el</span><input class="inp" type="date" data-k="GARANTIA_HASTA" value="${esc(datos.GARANTIA_HASTA||'')}"><small class="muted gar-c" style="font-size:11.5px;margin-top:3px">Se calcula sola; puedes corregirla</small></label>
+    </div></div>`;}
+/* cálculo en vivo (sirve para registrar y para editar) */
+document.addEventListener('input',e=>{const k=e.target.dataset&&e.target.dataset.k;if(!k)return;const box=e.target.closest('.more-f');if(!box)return;
+  const q=x=>box.querySelector(`[data-k="${x}"]`);
+  if(k==='FECHA_COMPRA'&&q('GARANTIA_DESDE')&&!q('GARANTIA_DESDE').value){q('GARANTIA_DESDE').value=e.target.value;}
+  if(['FECHA_COMPRA','GARANTIA_DESDE','GARANTIA_MESES'].includes(k)&&q('GARANTIA_HASTA')){const f=garFin(q('GARANTIA_DESDE').value,q('GARANTIA_MESES').value);if(f)q('GARANTIA_HASTA').value=f;}});
+document.addEventListener('click',e=>{const b=e.target.closest('[data-gm]');if(!b)return;e.preventDefault();const box=b.closest('.more-f');const m=box.querySelector('[data-k="GARANTIA_MESES"]');m.value=b.dataset.gm;
+  const d=box.querySelector('[data-k="GARANTIA_DESDE"]'),c=box.querySelector('[data-k="FECHA_COMPRA"]');if(!d.value&&c&&c.value)d.value=c.value;m.dispatchEvent(new Event('input',{bubbles:true}));});
 function campoHtml(k,l,t,req,datos,ia){
   const v=datos[k]||'',deIa=ia&&NV&&NV.ficha&&Object.values(NV.ficha).map(String).includes(v)&&v;
   return `<label class="fld"><span class="lbl">${esc(l)}${req?' <span class="req">*</span>':''}${deIa?' <span class="ia-tag">IA</span>':''}</span><input class="inp" data-k="${k}" type="${t}" ${t==='number'?'step="0.01" inputmode="decimal"':''} value="${esc(v)}"></label>`;
 }
 function obligatorios(cat){return ['DESCRIPCION'].concat((CAT.categorias.find(c=>c.codigo===cat)||{}).obligatorios||[]);}
 function formFicha(datos,ia){
-  const obl=obligatorios(datos.CATEGORIA),compraReq=CAMPOS_COMPRA.some(c=>obl.includes(c[0]));
+  const obl=obligatorios(datos.CATEGORIA),compraReq=CAMPOS_COMPRA.some(c=>obl.includes(c[0]))||obl.includes('GARANTIA_HASTA');
   return `<div class="grid2" style="margin-top:14px">
       <label class="fld"><span class="lbl">Categoría <span class="req">*</span>${ia&&datos.CATEGORIA?' <span class="ia-tag">IA</span>':''}</span><select class="inp" data-k="CATEGORIA"><option value="">Elige…</option>${CAT.categorias.map(c=>`<option value="${c.codigo}" ${datos.CATEGORIA===c.codigo?'selected':''}>${esc(c.nombre)} · ${c.codigo}</option>`).join('')}</select></label>
       ${CAMPOS.map(([k,l,t])=>campoHtml(k,l,t,obl.includes(k),datos,ia)).join('')}
       <label class="fld"><span class="lbl">Estado físico</span><select class="inp" data-k="ESTADO_FISICO"><option value="">—</option>${CAT.estados_fisicos.map(e=>`<option ${datos.ESTADO_FISICO===e?'selected':''}>${esc(e)}</option>`).join('')}</select></label>
       <label class="fld"><span class="lbl">Ubicación exacta</span><input class="inp" data-k="UBICACION" value="${esc(datos.UBICACION||'')}" placeholder="Ej.: Oficina 2, planta baja"></label>
     </div>
-    <details class="more-f" ${compraReq||CAMPOS_COMPRA.some(c=>datos[c[0]])?'open':''}><summary>Compra, garantía y seguro${compraReq?' · obligatorio para esta categoría':''}</summary>
-      <div class="grid2">${CAMPOS_COMPRA.map(([k,l,t])=>campoHtml(k,l,t,obl.includes(k),datos,ia)).join('')}</div></details>
+    <details class="more-f" ${compraReq||CAMPOS_COMPRA.some(c=>datos[c[0]])||datos.GARANTIA_HASTA?'open':''}><summary>Compra, garantía y seguro${compraReq?' · obligatorio para esta categoría':''}</summary>
+      <div class="grid2">${CAMPOS_COMPRA.map(([k,l,t])=>campoHtml(k,l,t,obl.includes(k),datos,ia)).join('')}</div>${garBloque(datos,obl.includes('GARANTIA_HASTA'))}</details>
     <label class="fld" style="margin-top:12px"><span class="lbl">Observaciones</span><textarea class="inp" data-k="OBSERVACIONES">${esc(datos.OBSERVACIONES||'')}</textarea></label>`;
 }
 function leerForm(cont,datos){cont.querySelectorAll('[data-k]').forEach(i=>{datos[i.dataset.k]=i.value.trim();});return datos;}
@@ -912,8 +955,8 @@ $('#bulk').addEventListener('click',e=>{
   if(t==='ETQ'){reimprimir([...SEL]);return;}
   dlgMovimiento(t,[...SEL]);
 });
-$('#expInv').onclick=()=>exportar('inventario',['Código','Categoría','Descripción','Marca','Modelo','Serie','Color','Material','Estado físico','Empresa','Ciudad','Ubicación','Situación','Custodio','Cédula custodio','Acta pendiente','Valor compra','Fecha compra','Proveedor','Factura','Garantía hasta','Póliza','Observaciones','Registrado','Registrado por'],
-  filtrar().map(a=>[a.codigo,catNom(a.categoria),a.descripcion,a.marca,a.modelo,a.serie,a.color,a.material,a.estado_fisico,a.empresa,a.ciudad,a.ubicacion,sitTxt(a),a.custodio_nombre,a.custodio_cedula,a.acta_pendiente,a.valor_compra,a.fecha_compra,a.proveedor,a.factura,a.garantia_hasta,a.poliza,a.observaciones,a.creado_el,a.creado_por]));
+$('#expInv').onclick=()=>exportar('inventario',['Código','Categoría','Descripción','Marca','Modelo','Serie','Color','Material','Estado físico','Empresa','Ciudad','Ubicación','Situación','Custodio','Cédula custodio','Acta pendiente','Valor compra','Fecha compra','Proveedor','Factura','Garantía desde','Garantía meses','Garantía km','Garantía hasta','Póliza','Observaciones','Registrado','Registrado por'],
+  filtrar().map(a=>[a.codigo,catNom(a.categoria),a.descripcion,a.marca,a.modelo,a.serie,a.color,a.material,a.estado_fisico,a.empresa,a.ciudad,a.ubicacion,sitTxt(a),a.custodio_nombre,a.custodio_cedula,a.acta_pendiente,a.valor_compra,a.fecha_compra,a.proveedor,a.factura,a.garantia_desde,a.garantia_meses,a.garantia_km,a.garantia_hasta,a.poliza,a.observaciones,a.creado_el,a.creado_por]));
 function exportar(nombre,cab,filas){
   const c=v=>{const s=String(v??'');return /[;"\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
   const txt='sep=;\n'+[cab].concat(filas).map(f=>f.map(c).join(';')).join('\n');
@@ -936,7 +979,7 @@ async function detalleActivo(codigo){
       ${kv('CUSTODIO',a.custodio_nombre?`${a.custodio_nombre} · C.I. ${a.custodio_cedula}`:'')}${kv('UBICACIÓN',a.ubicacion)}
       ${kv('MARCA',a.marca)}${kv('MODELO',a.modelo)}${kv('SERIE',a.serie)}${kv('COLOR',a.color)}${kv('MATERIAL',a.material)}${kv('ESTADO FÍSICO',a.estado_fisico)}
       ${kv('VALOR DE COMPRA',money(a.valor_compra))}${kv('FECHA DE COMPRA',dmy(a.fecha_compra))}${kv('PROVEEDOR',a.proveedor)}${kv('FACTURA',a.factura)}
-      ${kv('GARANTÍA HASTA',dmy(a.garantia_hasta))}${kv('PÓLIZA',a.poliza)}${kv('OBSERVACIONES',a.observaciones)}${kv('REGISTRADO',`${dmy(a.creado_el)} · ${a.creado_por}`)}
+      ${kv('GARANTÍA',garTexto(a))}${kv('PÓLIZA',a.poliza)}${kv('OBSERVACIONES',a.observaciones)}${kv('REGISTRADO',`${dmy(a.creado_el)} · ${a.creado_por}`)}
     </div>
     <div class="qrbox"><span class="q">${qrSvg(qrUrl(a.codigo))}</span><div><b style="font-family:'Space Mono',monospace;font-size:13px">${esc(a.codigo)}</b><p class="sub" style="margin:4px 0 8px">Etiqueta: ${a.etiqueta==='POR IMPRIMIR'?'por imprimir':'impresa'}</p><button class="btn sm" id="dEtq">Reimprimir etiqueta</button></div></div>
     ${a.estado!=='BAJA'&&!a.acta_pendiente?`<div class="sec-h"><h3>Acciones</h3></div><div class="row">
@@ -958,7 +1001,8 @@ async function detalleActivo(codigo){
 }
 function editarActivo(a){
   const datos={CATEGORIA:a.categoria,DESCRIPCION:a.descripcion,MARCA:a.marca,MODELO:a.modelo,SERIE:a.serie,COLOR:a.color,MATERIAL:a.material,ESTADO_FISICO:a.estado_fisico,
-    UBICACION:a.ubicacion,VALOR_COMPRA:a.valor_compra,FECHA_COMPRA:a.fecha_compra,PROVEEDOR:a.proveedor,FACTURA:a.factura,GARANTIA_HASTA:a.garantia_hasta,POLIZA:a.poliza,OBSERVACIONES:a.observaciones};
+    UBICACION:a.ubicacion,VALOR_COMPRA:a.valor_compra,FECHA_COMPRA:a.fecha_compra,PROVEEDOR:a.proveedor,FACTURA:a.factura,GARANTIA_HASTA:a.garantia_hasta,POLIZA:a.poliza,OBSERVACIONES:a.observaciones,
+    GARANTIA_DESDE:a.garantia_desde,GARANTIA_MESES:a.garantia_meses,GARANTIA_KM:a.garantia_km};
   const c=abrir(`<div class="cod">${esc(a.codigo)}</div><h2 style="margin-top:6px">Editar ficha</h2>
     <p class="sub">El código no cambia. Cada cambio queda en el historial.</p>
     <div id="eForm">${formFicha(datos,false)}</div>
@@ -1259,7 +1303,7 @@ async function vFicha(codigo){
     <div class="row" style="margin-top:10px"><span class="sit ${sitClase(a)}">${esc(sitTxt(a))}</span><span class="pill">${esc(a.empresa)} · ${esc(a.ciudad)}</span></div>
     ${f.length?`<div class="gal">${f.map(x=>`<img src="${thumb(x.id,600)}" alt="">`).join('')}</div>`:''}
     ${r.nivel==='basico'?`<p class="sub" style="margin-top:12px">Tienes la vista básica. El detalle lo ve el custodio y la administración.</p>`:`
-    <div class="kv">${kv('CUSTODIO',a.custodio_nombre)}${kv('UBICACIÓN',a.ubicacion)}${kv('MARCA',a.marca)}${kv('MODELO',a.modelo)}${kv('SERIE',a.serie)}${kv('ESTADO FÍSICO',a.estado_fisico)}${kv('GARANTÍA HASTA',dmy(a.garantia_hasta))}${kv('PÓLIZA',a.poliza)}${kv('OBSERVACIONES',a.observaciones)}</div>`}
+    <div class="kv">${kv('CUSTODIO',a.custodio_nombre)}${kv('UBICACIÓN',a.ubicacion)}${kv('MARCA',a.marca)}${kv('MODELO',a.modelo)}${kv('SERIE',a.serie)}${kv('ESTADO FÍSICO',a.estado_fisico)}${kv('GARANTÍA',garTexto(a))}${kv('PÓLIZA',a.poliza)}${kv('OBSERVACIONES',a.observaciones)}</div>`}
     ${ADMIN?`<a class="primary" style="margin-top:16px" href="#inventario?c=${encodeURIComponent(a.codigo)}" id="fGes">Gestionar este activo</a>`:''}
   </div>${a.historial?`<div class="sec-h"><h2>Historial</h2></div>${timeline(a.historial,false)}`:''}`;
   if($('#fGes'))$('#fGes').onclick=e=>{e.preventDefault();history.replaceState(null,'',location.pathname+'#inventario?c='+encodeURIComponent(a.codigo));arrancar();};

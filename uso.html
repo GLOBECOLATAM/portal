@@ -675,10 +675,12 @@ function estadoPlan(e,p){if(p.hacer)return {prox:e.lect,falta:-1e-6*p.cada,pct:1
 function peor(e){let b=null;(e.plan||[]).forEach(p=>{const s=estadoPlan(e,p);if(!b||s.falta/p.cada<b.falta/b.p.cada)b={...s,p};});return b||{prox:0,falta:Infinity,pct:0,st:'ok',none:true,p:{t:'Sin mantenimientos',cada:1}};}
 function faltaTxt(e,s){return s.none?'configura los intervalos':s.hacer?'hacer ahora para arrancar el conteo':s.falta<0?`pasado por ${fv(e,-s.falta)} ${uni(e)}`:`faltan ${fv(e,s.falta)} ${uni(e)}`;}
 function garantia(e){
+  if(e.garKm&&e.tipo==='K'&&e.lect>=e.garKm)return {st:'bad',t:'Fuera de garantía',d:`Superó los ${fmt(e.garKm)} km de cobertura`};
   if(!e.garantia)return {st:'mute',t:'Sin datos de garantía',d:e.prov?'Ficha rápida: completa factura y garantía en Gestión de activos':'Agrega la garantía en Gestión de activos'};
   const dias=Math.round((new Date(e.garantia+'T12:00')-HOY())/864e5);
   if(dias<0)return {st:'bad',t:'Fuera de garantía',d:`Venció el ${dmy(e.garantia)}`};
-  return {st:dias<=60?'warn':'ok',t:dias<=60?'Garantía por vencer':'En garantía',d:`Hasta el ${dmy(e.garantia)} · ${dias<60?dias+' días':Math.floor(dias/30)+' meses'}`};
+  const km=e.garKm&&e.tipo==='K'?` o ${fmt(e.garKm)} km (faltan ${fmt(e.garKm-e.lect)} km)`:'';
+  return {st:dias<=60?'warn':'ok',t:dias<=60?'Garantía por vencer':'En garantía',d:`Hasta el ${dmy(e.garantia)}${km} · ${dias<60?dias+' días':Math.floor(dias/30)+' meses'}`};
 }
 const GC={ok:['rgba(29,158,117,.12)','rgba(29,158,117,.4)','var(--teal)'],warn:['rgba(224,168,61,.12)','rgba(224,168,61,.42)','var(--amber)'],bad:['rgba(224,101,90,.12)','rgba(224,101,90,.42)','var(--red)'],mute:['var(--surface)','var(--line)','var(--muted)']};
 const ICO_ALERTA='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 21 19H3z"/><path d="M12 9.5v4M12 16.4v.1"/></svg>';
