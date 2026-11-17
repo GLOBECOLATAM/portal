@@ -888,9 +888,14 @@ function nvListo(){
     <p class="sub">La etiqueta quedó en la cola de impresión (pestaña Etiquetas).</p>
     ${r.acta?`<div class="aviso inf" style="text-align:left">Se creó el acta <b>${esc(r.acta)}</b>. La custodia pasa cuando firme quien recibe.</div>
       <button class="primary" id="nvFirm" style="margin-top:14px">✍︎ Firmar el acta ahora</button>`:''}
-    <div class="row" style="margin-top:12px;justify-content:center"><button class="btn bl" id="nvOtro">＋ Registrar otro</button><button class="btn" id="nvInv">Ver inventario</button></div>
+    <div class="row" style="margin-top:12px;justify-content:center"><button class="btn bl" id="nvOtro">＋ Registrar otro</button><button class="btn" id="nvCorr">Corregir ficha</button><button class="btn" id="nvInv">Ver inventario</button></div>
   </div>`;
   if($('#nvFirm'))$('#nvFirm').onclick=()=>abrirActa(r.acta);
+  $('#nvCorr').onclick=async e=>{
+    let a=INV&&INV.find(x=>x.codigo===r.codigo);
+    if(!a){const b=e.currentTarget,h=b.innerHTML;b.disabled=true;b.innerHTML='<span class="spin dk"></span>';await cargarInv(true);b.disabled=false;b.innerHTML=h;a=INV&&INV.find(x=>x.codigo===r.codigo);}
+    if(a)editarActivo(a);else toast('Todavía no aparece en el inventario. Intenta en unos segundos.');
+  };
   $('#nvOtro').onclick=()=>{nvReset();nvFotos();};
   $('#nvInv').onclick=()=>{nvReset();ir('inventario');};
 }
@@ -989,6 +994,8 @@ async function detalleActivo(codigo){
       <button class="btn sm" data-m="UBICACION">Cambiar ubicación</button>
       <button class="btn sm" id="dEdit">Editar ficha</button>
       <button class="btn sm rd" data-m="BAJA">Dar de baja</button></div>`:''}
+    ${a.estado!=='BAJA'&&a.acta_pendiente?`<div class="sec-h"><h3>Acciones</h3><small>Asignar, traspasar o dar de baja se habilita cuando se firme el acta</small></div><div class="row">
+      <button class="btn sm" id="dEdit">Corregir ficha</button></div>`:''}
     <div class="sec-h"><h3>Historial</h3><small id="dHc"></small></div>
     <div id="dHist"><div style="padding:16px;text-align:center"><span class="spin dk"></span></div></div>
   `,true);
